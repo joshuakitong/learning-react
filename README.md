@@ -12,3 +12,4 @@ Live: [View Site](https://joshuakitong.github.io/react-tic-tac-toe)
  - Updated win/draw state per round, and show match winner
  - Interchanging first to play per round
  - Added replayability "Replay" or "Return to Start"
+ - Added custom UI styling and responsive layout
