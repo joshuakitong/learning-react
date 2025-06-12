@@ -188,6 +188,7 @@ export default function Game() {
               value={player1}
               onChange={(e) => setPlayer1(e.target.value)}
               required
+              maxLength={12}
             />
 
             <input
@@ -196,6 +197,7 @@ export default function Game() {
               value={player2}
               onChange={(e) => setPlayer2(e.target.value)}
               required
+              maxLength={12}
             />
 
             <input
