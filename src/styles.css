@@ -2,10 +2,12 @@
   box-sizing: border-box;
 }
 
-body {
-  font-family: sans-serif;
-  margin: 20px;
+body, html {
+  height: 100%;
+  margin: 0;
   padding: 0;
+  font-family: sans-serif;
+  background: #f0e7db;
 }
 
 h1 {
@@ -50,12 +52,6 @@ ul {
   box-sizing: border-box;
 }
 
-body {
-  font-family: sans-serif;
-  margin: 20px;
-  padding: 0;
-}
-
 .square {
   background: #fff;
   border: 1px solid #999;
@@ -77,18 +73,6 @@ body {
   display: table;
 }
 
-.status {
-  margin-bottom: 10px;
-}
-.game {
-  display: flex;
-  flex-direction: row;
-}
-
-.game-controls, .game-board {
-  margin-left: 20px;
-}
-
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -104,7 +88,7 @@ body {
 }
 
 .modal {
-  background: white;
+  background-color: rgba(255, 255, 255, 1);
   padding: 2rem;
   border-radius: 8px;
   max-height: 90vh;
@@ -120,10 +104,103 @@ body {
 }
 
 input {
-  margin: 0.5rem;
   padding: 0.5rem;
 }
 
 button {
   padding: 0.5rem 1rem;
+}
+
+.form-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.game-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+  background-color: #8b5e3c;
+  background-blend-mode: multiply;
+  padding: 2rem;
+}
+
+.game {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.game-body, .game-setup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.game-board {
+  margin-bottom: 1rem;
+}
+
+.round-info {
+  text-align: center;
+}
+
+.match-info {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.action-button {
+  padding: 0.5rem 1rem;
+  background-color: #8b0000;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button.action-button:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.square:hover {
+  cursor: pointer;
+  background-color: #f0f0f0;
+}
+
+.square .ghost {
+  visibility: hidden;
+  opacity: 0.3;
+}
+
+.square:hover .ghost {
+  visibility: visible;
+}
+
+.exit-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: #333;
+  cursor: pointer;
+  z-index: 2;
+  transition: color 0.2s ease;
+}
+
+.exit-button:hover {
+  color: #8b0000;
 }

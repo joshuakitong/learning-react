@@ -1,29 +1,32 @@
 import { useState } from 'react';
+import confetti from 'canvas-confetti';
 
-function Square({ value, onSquareClick }) {
+function Square({ value, onSquareClick, currentSymbol }) {
   return (
     <button className="square" onClick={onSquareClick}>
-      {value}
+      {value ? value : <span className="ghost">{currentSymbol}</span>}
     </button>
   );
 }
 
-function GameInfo({ players, playerWins, winsRequired, currentPlayer }) {
+function RoundInfo({ playerWins, currentPlayer }) {
   return (
-    <div className="game-info">
-      <h2>
-        {players.player1}: {playerWins.X} wins | {players.player2}: {playerWins.O} wins
-      </h2>
-      <h3>
-        First to get {winsRequired} wins the match!
-      </h3>
-      <div className="status">Round {playerWins.roundNumber}</div>
-      <div className="status">
-        Next player: {currentPlayer.name} ({currentPlayer.symbol})
-      </div>
+    <div className="round-info">
+      Round #{playerWins.roundNumber}
+      <h3>Next player: {currentPlayer.name}</h3>
     </div>
   );
 }
+
+function MatchInfo({ players, playerWins, winsRequired }) {
+  return (
+    <div className="match-info">
+      <h2>{players.player1}: {playerWins.X} wins | {players.player2}: {playerWins.O} wins</h2>
+      First to get {winsRequired} wins the match!
+    </div>
+  );
+}
+
 
 function Board({ squares, onPlay, currentPlayer }) {
   function handleClick(i) {
@@ -44,6 +47,7 @@ function Board({ squares, onPlay, currentPlayer }) {
                 key={i}
                 value={squares[i]}
                 onSquareClick={() => handleClick(i)}
+                currentSymbol={currentPlayer.symbol}
               />
             );
           })}
@@ -79,7 +83,13 @@ export default function Game() {
 
   const winnerSymbol = calculateWinner(currentSquares);
   const isDraw = !winnerSymbol && currentSquares.every(Boolean);
+  
+  const [player1, setPlayer1] = useState('');
+  const [player2, setPlayer2] = useState('');
+  const [wins, setWins] = useState('');
 
+  const [showExitModal, setShowExitModal] = useState(false);
+  
   if ((winnerSymbol || isDraw) && players && !showModal) {
     let resultMsg = '';
     let nextStarter = startingSymbol === 'X' ? 'O' : 'X';
@@ -97,7 +107,13 @@ export default function Game() {
 
       if (updatedWins[winnerSymbol] === winsRequired) {
         setMatchWinner(winnerName);
-        resultMsg += ` and has won the match!`;
+        resultMsg = `${winnerName} and has won the match!`;
+
+        confetti({
+          particleCount: 200,
+          spread: 360,
+          origin: { y: 0.5 },
+        });
       }
 
       nextStarter = loserSymbol;
@@ -143,6 +159,7 @@ export default function Game() {
     setPlayers(null);
     setWinsRequired(0);
     setGameStarted(false);
+    setShowExitModal(false);
     handleResetMatch();
   }
 
@@ -159,46 +176,80 @@ export default function Game() {
 
   if (!gameStarted) {
     return (
-      <div className="game-setup">
-        <h2>Start New Tic-Tac-Toe Match</h2>
-        <form onSubmit={handleFormSubmit}>
-          <input name="player1" placeholder="Player 1 Name (X)" required />
-          <input name="player2" placeholder="Player 2 Name (O)" required />
-          <input
-            name="wins"
-            placeholder="Number of wins to win match"
-            type="number"
-            min="1"
-            required
-          />
-          <button type="submit">Start Game</button>
-        </form>
+      <div className="game-container">
+        <div className="game">
+          <div className="game-setup">
+            <h1>Tic-Tac-Toe</h1>
+            <h3>Start New Match</h3>
+            <form onSubmit={handleFormSubmit} className="form-body">
+            <input
+              name="player1"
+              placeholder="Player (X) Name"
+              value={player1}
+              onChange={(e) => setPlayer1(e.target.value)}
+              required
+            />
+
+            <input
+              name="player2"
+              placeholder="Player (O) Name"
+              value={player2}
+              onChange={(e) => setPlayer2(e.target.value)}
+              required
+            />
+
+            <input
+              name="wins"
+              placeholder="Number of wins"
+              type="number"
+              min="1"
+              value={wins}
+              onChange={(e) => setWins(e.target.value)}
+              required
+            />
+
+            <button
+              type="submit"
+              className="action-button"
+              disabled={
+                !player1.trim() || !player2.trim() || wins < 1
+              }
+            >
+              Start Game
+            </button>
+          </form>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="game">
-      <div className="game-header">
-        <h1>Tic-Tac-Toe</h1>
-        <GameInfo
-          players={players}
-          playerWins={{ ...playerWins, roundNumber }}
-          winsRequired={winsRequired}
-          currentPlayer={currentPlayer}
-        />
-      </div>
-      <div className="game-board">
-        <Board
-          squares={currentSquares}
-          onPlay={handlePlay}
-          currentPlayer={currentPlayer}
-        />
-      </div>
-      <div className="game-controls">
-        <button onClick={handleUndo} disabled={currentMove === 0}>
-          Undo
-        </button>
+    <div className="game-container">
+      <div className="game">
+        <button className="exit-button" onClick={() => setShowExitModal(true)}>✕</button>
+        <div className="game-body">
+          <h1>Tic-Tac-Toe</h1>
+          <RoundInfo
+            playerWins={{ ...playerWins, roundNumber }}
+            currentPlayer={currentPlayer}
+          />
+          <div className="game-board">
+            <Board
+              squares={currentSquares}
+              onPlay={handlePlay}
+              currentPlayer={currentPlayer}
+            />
+          </div>
+          <button onClick={handleUndo} disabled={currentMove === 0} className="action-button">
+            Undo
+          </button>
+          <MatchInfo
+            players={players}
+            playerWins={{ ...playerWins, roundNumber }}
+            winsRequired={winsRequired}
+          />
+        </div>
       </div>
 
       {showModal && (
@@ -206,14 +257,25 @@ export default function Game() {
           <div className="modal">
             <p>{gameResult}</p>
             <div className="modal-buttons">
-            {matchWinner ? (
-              <>
-                <button onClick={handleResetMatch}>Replay</button>
-                <button onClick={handleReturnToStart}>Return to Start</button>
-              </>
-            ) : (
-              <button onClick={handleNextRound}>Next Round</button>
-            )}
+              {matchWinner ? (
+                <>
+                  <button onClick={handleResetMatch} className="action-button">Replay</button>
+                  <button onClick={handleReturnToStart} className="action-button">Return to Start</button>
+                </>
+              ) : (
+                <button onClick={handleNextRound} className="action-button">Next Round</button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      {showExitModal && (
+        <div className="modal-backdrop">
+          <div className="modal">
+            <p>Start new game?</p>
+            <div className="modal-buttons">
+              <button className="action-button" onClick={handleReturnToStart}>Yes</button>
+              <button className="action-button" onClick={() => setShowExitModal(false)}>No</button>
             </div>
           </div>
         </div>
